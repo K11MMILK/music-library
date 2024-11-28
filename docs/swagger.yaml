@@ -4,6 +4,13 @@ definitions:
       message:
         type: string
     type: object
+  handler.getAllGroupsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/musiclibrary.Group'
+        type: array
+    type: object
   handler.getAllSongsResponse:
     properties:
       data:
@@ -32,27 +39,34 @@ definitions:
     type: object
   musiclibrary.CreateSongInput:
     properties:
-      group:
-        example: Metallica
-        type: string
-      song:
+      groupId:
+        type: integer
+      songName:
         example: Enter Sandman
         type: string
     required:
-    - group
-    - song
+    - groupId
+    - songName
     type: object
-  musiclibrary.Song:
+  musiclibrary.Group:
     properties:
-      group:
+      groupName:
         type: string
       id:
         type: integer
-      song:
+    required:
+    - groupName
+    type: object
+  musiclibrary.Song:
+    properties:
+      groupId:
+        type: integer
+      id:
+        type: integer
+      songName:
         type: string
     required:
-    - group
-    - song
+    - songName
     type: object
   musiclibrary.SongDetailsDL:
     properties:
@@ -64,6 +78,12 @@ definitions:
         type: string
       songId:
         type: integer
+    type: object
+  musiclibrary.UpdateGroupInput:
+    properties:
+      groupName:
+        example: Metallica
+        type: string
     type: object
   musiclibrary.UpdateSongDetailsInput:
     properties:
@@ -79,10 +99,9 @@ definitions:
     type: object
   musiclibrary.UpdateSongInput:
     properties:
-      group:
-        example: Metallica
-        type: string
-      song:
+      groupId:
+        type: integer
+      songName:
         example: Enter Sandman
         type: string
     type: object
@@ -93,6 +112,155 @@ info:
   title: Music-Library
   version: "1.0"
 paths:
+  /api/group/:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all groups
+      operationId: get-all-groups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of all groups
+          schema:
+            $ref: '#/definitions/handler.getAllGroupsResponse'
+        "500":
+          description: Failed to get all groups
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetAllGroups
+      tags:
+      - group
+    post:
+      consumes:
+      - application/json
+      description: Create a new group
+      operationId: create-group
+      parameters:
+      - description: Group information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/musiclibrary.Group'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns group ID
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to create group
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: CreateGroup
+      tags:
+      - group
+  /api/group/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing group
+      operationId: delete-group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns status of the operation
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Invalid group ID
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to delete group
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: DeleteGroup
+      tags:
+      - group
+    put:
+      consumes:
+      - application/json
+      description: Update an existing group
+      operationId: update-group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Group information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/musiclibrary.UpdateGroupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns status of the operation
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Invalid input or ID
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to update group
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: UpdateGroup
+      tags:
+      - group
+  /api/group/filter:
+    get:
+      consumes:
+      - application/json
+      description: Get groups with optional filtering and pagination
+      operationId: get-groups-with-filter
+      parameters:
+      - description: Group name filter
+        in: query
+        name: groupname
+        type: string
+      - description: Page number for pagination
+        in: query
+        name: page
+        type: integer
+      - description: Number of groups per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a filtered list of groups
+          schema:
+            $ref: '#/definitions/handler.getAllGroupsResponse'
+        "500":
+          description: Failed to get groups
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetGroupsWithFilter
+      tags:
+      - group
   /api/song/:
     get:
       consumes:

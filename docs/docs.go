@@ -15,6 +15,229 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/group/": {
+            "get": {
+                "description": "Get a list of all groups",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "GetAllGroups",
+                "operationId": "get-all-groups",
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of all groups",
+                        "schema": {
+                            "$ref": "#/definitions/handler.getAllGroupsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get all groups",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "CreateGroup",
+                "operationId": "create-group",
+                "parameters": [
+                    {
+                        "description": "Group information",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/musiclibrary.Group"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns group ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create group",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/filter": {
+            "get": {
+                "description": "Get groups with optional filtering and pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "GetGroupsWithFilter",
+                "operationId": "get-groups-with-filter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group name filter",
+                        "name": "groupname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number for pagination",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of groups per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a filtered list of groups",
+                        "schema": {
+                            "$ref": "#/definitions/handler.getAllGroupsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get groups",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/{id}": {
+            "put": {
+                "description": "Update an existing group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "UpdateGroup",
+                "operationId": "update-group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Group information",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/musiclibrary.UpdateGroupInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns status of the operation",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or ID",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update group",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an existing group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "DeleteGroup",
+                "operationId": "delete-group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns status of the operation",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid group ID",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete group",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/song/": {
             "get": {
                 "description": "Get all songs",
@@ -422,6 +645,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.getAllGroupsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/musiclibrary.Group"
+                    }
+                }
+            }
+        },
         "handler.getAllSongsResponse": {
             "type": "object",
             "properties": {
@@ -466,34 +700,46 @@ const docTemplate = `{
         "musiclibrary.CreateSongInput": {
             "type": "object",
             "required": [
-                "group",
-                "song"
+                "groupId",
+                "songName"
             ],
             "properties": {
-                "group": {
-                    "type": "string",
-                    "example": "Metallica"
+                "groupId": {
+                    "type": "integer"
                 },
-                "song": {
+                "songName": {
                     "type": "string",
                     "example": "Enter Sandman"
+                }
+            }
+        },
+        "musiclibrary.Group": {
+            "type": "object",
+            "required": [
+                "groupName"
+            ],
+            "properties": {
+                "groupName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 }
             }
         },
         "musiclibrary.Song": {
             "type": "object",
             "required": [
-                "group",
-                "song"
+                "songName"
             ],
             "properties": {
-                "group": {
-                    "type": "string"
+                "groupId": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "song": {
+                "songName": {
                     "type": "string"
                 }
             }
@@ -512,6 +758,15 @@ const docTemplate = `{
                 },
                 "songId": {
                     "type": "integer"
+                }
+            }
+        },
+        "musiclibrary.UpdateGroupInput": {
+            "type": "object",
+            "properties": {
+                "groupName": {
+                    "type": "string",
+                    "example": "Metallica"
                 }
             }
         },
@@ -535,11 +790,10 @@ const docTemplate = `{
         "musiclibrary.UpdateSongInput": {
             "type": "object",
             "properties": {
-                "group": {
-                    "type": "string",
-                    "example": "Metallica"
+                "groupId": {
+                    "type": "integer"
                 },
-                "song": {
+                "songName": {
                     "type": "string",
                     "example": "Enter Sandman"
                 }
