@@ -1,0 +1,362 @@
+definitions:
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.getAllSongsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/musiclibrary.Song'
+        type: array
+    type: object
+  handler.songDetailsByIdResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/musiclibrary.SongDetailsDL'
+        type: array
+    type: object
+  handler.songTextResponse:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+    type: object
+  handler.statusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  musiclibrary.CreateSongInput:
+    properties:
+      group:
+        example: Metallica
+        type: string
+      song:
+        example: Enter Sandman
+        type: string
+    required:
+    - group
+    - song
+    type: object
+  musiclibrary.Song:
+    properties:
+      group:
+        type: string
+      id:
+        type: integer
+      song:
+        type: string
+    required:
+    - group
+    - song
+    type: object
+  musiclibrary.SongDetailsDL:
+    properties:
+      id:
+        type: integer
+      link:
+        type: string
+      releaseDate:
+        type: string
+      songId:
+        type: integer
+    type: object
+  musiclibrary.UpdateSongDetailsInput:
+    properties:
+      link:
+        example: https://example.com/song
+        type: string
+      releaseDate:
+        example: "2024-01-01"
+        type: string
+      text:
+        example: Song lyrics here
+        type: string
+    type: object
+  musiclibrary.UpdateSongInput:
+    properties:
+      group:
+        example: Metallica
+        type: string
+      song:
+        example: Enter Sandman
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: API Server for Music-library Application
+  title: Music-Library
+  version: "1.0"
+paths:
+  /api/song/:
+    get:
+      consumes:
+      - application/json
+      description: Get all songs
+      operationId: getAllSongs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of all songs
+          schema:
+            $ref: '#/definitions/handler.getAllSongsResponse'
+        "500":
+          description: Failed to get all songs
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetAllSongs
+      tags:
+      - song
+    post:
+      consumes:
+      - application/json
+      description: Create a new song
+      operationId: create-song
+      parameters:
+      - description: Song information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/musiclibrary.CreateSongInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns song ID
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to create song
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: CreateSong
+      tags:
+      - song
+  /api/song/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing song
+      operationId: delete-song
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns status of the operation
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Invalid song ID
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to delete song
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: DeleteSong
+      tags:
+      - song
+    put:
+      consumes:
+      - application/json
+      description: Update an existing song
+      operationId: update-song
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Song information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/musiclibrary.UpdateSongInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns status of the operation
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Invalid input or ID
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to update song
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: UpdateSong
+      tags:
+      - song
+  /api/song/filter:
+    get:
+      consumes:
+      - application/json
+      description: Get songs with filtering
+      operationId: getSongsWithFilter
+      parameters:
+      - description: Group filter
+        in: query
+        name: group
+        type: string
+      - description: Song filter
+        in: query
+        name: song
+        type: string
+      - description: Page number for pagination
+        in: query
+        name: page
+        type: integer
+      - description: Limit for pagination
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.getAllSongsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetSongsWithFilter
+      tags:
+      - song
+  /api/songDetails/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get song details by song ID
+      operationId: get-songDetails-by-id
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song details data
+          schema:
+            $ref: '#/definitions/handler.songDetailsByIdResponse'
+        "400":
+          description: Invalid song ID
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to get song details
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetSongDetailsById
+      tags:
+      - songDetails
+    put:
+      consumes:
+      - application/json
+      description: Update song details by songDetails ID
+      operationId: update-songDetails
+      parameters:
+      - description: SongDetails ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: SongDetails info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/musiclibrary.UpdateSongDetailsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status of the operation
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Invalid input or ID
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: SongDetails not found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to update song details
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: UpdateSongDetails
+      tags:
+      - songDetails
+  /api/songText/{id}/filter:
+    get:
+      consumes:
+      - application/json
+      description: Get song text with pagination by song ID
+      operationId: get-song-text
+      parameters:
+      - description: SongDetails ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Page number for pagination
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit of verses per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song text with pagination
+          schema:
+            $ref: '#/definitions/handler.songTextResponse'
+        "400":
+          description: Invalid songDetails ID or pagination parameters
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Failed to get songDetails
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetSongText
+      tags:
+      - songDetails
+swagger: "2.0"
